@@ -159,7 +159,7 @@ void print_revision(const char *progname,const char *revision)
 }
 
 
-int process_arguments(int, char **);
+
 int call_getopt(int, char **);
 int validate_arguments(void);
 void print_usage(void);
@@ -191,9 +191,6 @@ int main(int argc, char **argv){
 	// bindtextdomain (PACKAGE, LOCALEDIR);
 	// textdomain (PACKAGE);
 	
-	if(process_arguments(argc,argv)!=OK){
-		printf("Could not parse arguments");
-		}
 	srand(42);	
 	while (1){
 		
@@ -310,10 +307,10 @@ int send_dhcp_discover(int sock){
 
 	/* Set random hardware address */
 	char *fake=malloc(sizeof(char)*10);
-	sprintf(fake,"0%d:0%d:0%d:0%d:0%d:0%d",rand()%2,rand()%2,rand()%2,rand()%2,rand()%2,rand()%2);			
+	sprintf(fake,"%d:%d:%d:%d:%d:%d",rand()%2,rand()%2,rand()%2,rand()%2,rand()%2,rand()%2);			
 	printf("\n Fake MAC adress :%s\n",fake);
 			
-	sscanf(optarg,"%x:%x:%x:%x:%x:%x", 
+	sscanf(fake,"%x:%x:%x:%x:%x:%x", 
 		my_client_mac+0,
 		my_client_mac+1,
 		my_client_mac+2,
