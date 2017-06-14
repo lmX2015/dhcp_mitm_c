@@ -131,7 +131,7 @@ unsigned char client_hardware_address[MAX_DHCP_CHADDR_LENGTH]="";
 unsigned int my_client_mac[MAX_DHCP_CHADDR_LENGTH];
 int mymac = 0;
 
-char network_interface_name[8]="wlp2s1";
+char network_interface_name[8]="wlp2s0";
 
 u_int32_t packet_xid=0;
 
