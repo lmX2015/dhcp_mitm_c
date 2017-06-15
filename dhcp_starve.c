@@ -14,25 +14,6 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
-
-// Notes:
-//  -s serverip
-//  -t timeout
-//  -i interface
-//  -m mac    
-//  -v verbose
-//  -v version
-//  -help
-// Example: dhcp -i eth0
-//
-const char *COPYRIGHT= "\n";
-
-const char *progname = "check_dhcp";
-const char *revision = "$Revision: 1.7 $";
-const char *copyright = "2001-2004";
-const char *email = "test@dev.fr";
-const char *hexa ="0123456789abcdef";
-
 #include <linux/if_ether.h>
 #include <features.h>
 
@@ -40,23 +21,17 @@ const char *hexa ="0123456789abcdef";
 #define HAVE_GETOPT_H
 
 #define usage printf
-
 /**** Common definitions ****/
-
 #define STATE_OK          0
 #define STATE_WARNING     1
 #define STATE_CRITICAL    2
 #define STATE_UNKNOWN     -1
-
 #define OK                0
 #define ERROR             -1
-
 #define FALSE             0
 #define TRUE              1
 
-
 /**** DHCP definitions ****/
-
 #define MAX_DHCP_CHADDR_LENGTH           16
 #define MAX_DHCP_SNAME_LENGTH            64
 #define MAX_DHCP_FILE_LENGTH             128
@@ -131,7 +106,7 @@ unsigned char client_hardware_address[MAX_DHCP_CHADDR_LENGTH]="";
 unsigned int my_client_mac[MAX_DHCP_CHADDR_LENGTH];
 int mymac = 0;
 
-char network_interface_name[8]="wlp2s0";
+char * network_interface_name;
 
 u_int32_t packet_xid=0;
 
@@ -180,10 +155,25 @@ int create_dhcp_socket(void);
 int close_dhcp_socket(int);
 int send_dhcp_packet(void *,int,int,struct sockaddr_in *);
 int receive_dhcp_packet(void *,int,int,int,struct sockaddr_in *);
-
-
+int set_up_connection();
 
 int main(int argc, char **argv){
+	if (argc==2){network_interface_name=argv[1];
+			
+	}
+	else {network_interface_name="wlp2s0"; printf("\nInterface autoset to wlp2s0 \n");}	
+	int result;
+	int count=0;
+	while(1){
+	printf("#############  Begin DHCP procedure number %d\n",count);
+	result=set_up_connection();
+	printf("\n%d\n",result);
+	++count;	
+	}
+	return 0;
+	}
+
+set_up_connection(){
 	int dhcp_socket;
 	int result;
 
@@ -192,7 +182,7 @@ int main(int argc, char **argv){
 	// textdomain (PACKAGE);
 	
 	srand(42);	
-	while (1){
+	//while (1){
 		
 	/* create socket for DHCP communications */
 	dhcp_socket=create_dhcp_socket();
@@ -215,7 +205,7 @@ int main(int argc, char **argv){
 	/* free allocated memory */
 	free_dhcp_offer_list();
 	free_requested_server_list();
-	}
+	//}
 	return result;
         }
 
@@ -274,7 +264,7 @@ int send_dhcp_discover(int sock){
 	dhcp_packet discover_packet;
 	struct sockaddr_in sockaddr_broadcast;
 
-
+	verbose=1;
 	/* clear the packet data structure */
 	bzero(&discover_packet,sizeof(discover_packet));
 
