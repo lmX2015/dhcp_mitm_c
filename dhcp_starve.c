@@ -159,7 +159,7 @@ int set_up_connection();
 
 int main(int argc, char **argv){
 	if (argc==2){network_interface_name=argv[1];
-			
+	srand(42);			
 	}
 	else {network_interface_name="wlp2s0"; printf("\nInterface autoset to wlp2s0 \n");}	
 	int result;
@@ -181,7 +181,6 @@ set_up_connection(){
 	// bindtextdomain (PACKAGE, LOCALEDIR);
 	// textdomain (PACKAGE);
 	
-	srand(42);	
 	//while (1){
 		
 	/* create socket for DHCP communications */
