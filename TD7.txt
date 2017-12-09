@@ -1,8 +1,0 @@
-Code ecrit conjointement: Louis Mutricy et Othman EL Balghiti
-Lancer dhcp_starve avec comme paramètre le nom de l'interface et l'adresse du serveur (la fake)
-dhcp_starve enverra des dhcp discovery en continue avec une adresse mac random mais qui commence toujours par 4 (pour les retouver sur wireshark)
-dhcp_starve va renvoyer a (je suis en qwerty) ce moment des adresses ip valides que l'on pourra proposer au client
-
-Lancer dhcp_test dans un autre terminal avec comme paramètre l'interface, l'adresse du serveur et la fake adress ip, celui ci va ecouter les broadcast et renvoyer au client une adresse ip qu'il a recupere aupres du serveur
-
-(Il manque donc l'etape ou on capture des requetes DNS de l'Ip si elle a ete accepte par le client et qu'on renvoie une reponse a la place du serveur)
