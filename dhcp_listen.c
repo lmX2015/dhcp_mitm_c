@@ -157,22 +157,19 @@ int main(int argc, char **argv){
 	int result;
 	srand(42);
 	int count=0;
-	int dhcp_socket;
-	dhcp_socket=set_up_first_connection();
 	while(1){
-	sleep(4);
 	printf("#############  Begin DHCP procedure number %d\n",count);
-	result=set_up_connection(dhcp_socket);
+	result=set_up_connection();
 	printf("\n%d\n",result);
 	++count;	
 	}
 	return 0;
 	}
 
-int set_up_first_connection(){
+
+int set_up_connection(){
+	int result;
 	int dhcp_socket;
-	
-		
         /* create socket for DHCP communications */
 	dhcp_socket=create_dhcp_socket();
 	
@@ -180,49 +177,18 @@ int set_up_first_connection(){
 	get_hardware_address(dhcp_socket,network_interface_name);
 
 	/* send DHCPDISCOVER packet */
-	send_dhcp_discover(dhcp_socket);
+
+	//send_dhcp_discover(dhcp_socket);
 
 	/* wait for a DHCPOFFER packet */
 	get_dhcp_offer(dhcp_socket);
 
+	/* close socket we created */
+	//close_dhcp_socket(dhcp_socket);
 
-	/* determine state/plugin output to return */
-	//result=get_results();
-
-	/* free allocated memory */
-	//free_dhcp_offer_list();
-	//free_requested_server_list();
-	//}
+	
 	return dhcp_socket;
         }
-int set_up_connection(int dhcp_socket)
-	{
-	
-	printf("sending offer\n");	
-        /* create socket for DHCP communications */
-	//dhcp_socket=create_dhcp_socket();
-	
-	/* get hardware address of client machine */
-	//get_hardware_address(dhcp_socket,network_interface_name);
-
-	/* send DHCPDISCOVER packet */
-	send_dhcp_discover(dhcp_socket);
-
-	/* wait for a DHCPOFFER packet */
-	//get_dhcp_offer(dhcp_socket);
-
-
-	/* determine state/plugin output to return */
-	//result=get_results();
-
-	/* free allocated memory */
-	//free_dhcp_offer_list();
-	//free_requested_server_list();
-	//}
-	return 0;
-        }
-
-
 
 
 /* determines hardware address on client machine */
@@ -291,7 +257,7 @@ int send_dhcp_discover(int sock){
 
 	/* Set random hardware address */
 	char *fake=malloc(sizeof(char)*10);
-	sprintf(fake,"%d:%d:%d:%d:%d:%d",4,rand()%9,rand()%9,rand()%9,rand()%9,rand()%9);			
+	sprintf(fake,"%d:%d:%d:%d:%d:%d",4,4,rand()%9,rand()%9,rand()%9,rand()%9);			
 	printf("\n Fake MAC adress : %s\n",fake);
 			
 	sscanf(fake,"%x:%x:%x:%x:%x:%x", 
@@ -401,9 +367,9 @@ int get_dhcp_offer(int sock){
 		/* check packet xid to see if its the same as the one we used in the discover packet */
 		if(ntohl(offer_packet.xid)!=packet_xid){
 			if (verbose)
-				printf("DHCPOFFER XID (%lu) did not match DHCPDISCOVER XID (%lu) - ignoring packet\n",(unsigned long) ntohl(offer_packet.xid),(unsigned long) packet_xid);
+				printf("DHCPOFFER XID (%lu) did not match DHCPDISCOVER XID (%lu)\n",(unsigned long) ntohl(offer_packet.xid),(unsigned long) packet_xid);
 
-			continue;
+			//continue;
 		        }
 
 		/* check hardware address */
@@ -423,7 +389,7 @@ int get_dhcp_offer(int sock){
 
 		if(result==ERROR){
 			if (verbose) 
-				printf("DHCPOFFER hardware address did not match our own\n");
+				printf("DHCPOFFER hardware address did not match our own \n");
 
 			//continue;
 		        }

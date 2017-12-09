@@ -127,8 +127,74 @@ int request_specific_address=FALSE;
 int received_requested_address=FALSE;
 int verbose=0;
 struct in_addr requested_address;
+int create_dhcp_socket(void){
+        struct sockaddr_in myname;
+	struct ifreq interface;
+        int sock;
+        int flag=1;
 
-int send_answer(int sock){
+        /* Set up the address we're going to bind to. */
+	bzero(&myname,sizeof(myname));
+        myname.sin_family=AF_INET;
+        myname.sin_port=htons(DHCP_CLIENT_PORT);
+        myname.sin_addr.s_addr=INADDR_ANY;                 /* listen on any address */
+        bzero(&myname.sin_zero,sizeof(myname.sin_zero));
+
+        /* create a socket for DHCP communications */
+	sock=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
+        if(sock<0){
+		printf("Error: Could not create socket!\n");
+		exit(STATE_UNKNOWN);
+	        }
+
+	if (verbose)
+		printf("DHCP socket: %d\n",sock);
+
+        /* set the reuse address flag so we don't get errors when restarting */
+        flag=1;
+        if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(char *)&flag,sizeof(flag))<0){
+		printf("Error: Could not set reuse address option on DHCP socket!\n");
+		exit(STATE_UNKNOWN);
+	        }
+
+        /* set the broadcast option - we need this to listen to DHCP broadcast messages */
+        if(setsockopt(sock,SOL_SOCKET,SO_BROADCAST,(char *)&flag,sizeof flag)<0){
+		printf("Error: Could not set broadcast option on DHCP socket!\n");
+		exit(STATE_UNKNOWN);
+	        }
+
+	/* bind socket to interface */
+	strncpy(interface.ifr_ifrn.ifrn_name,network_interface_name,IFNAMSIZ);
+	if(setsockopt(sock,SOL_SOCKET,SO_BINDTODEVICE,(char *)&interface,sizeof(interface))<0){
+		printf("Error: Could not bind socket to interface %s.  Check your privileges...\n",network_interface_name);
+		exit(STATE_UNKNOWN);
+	        }
+
+
+        /* bind the socket */
+        if(bind(sock,(struct sockaddr *)&myname,sizeof(myname))<0){
+		printf("Error: Could not bind to DHCP socket (port %d)!  Check your privileges...\n",DHCP_CLIENT_PORT);
+		exit(STATE_UNKNOWN);
+	        }
+
+        return sock;
+        }
+
+
+
+
+
+int send_answer(int sock,int argc, char **argv){
+	char *server_ip;
+	char *offered_ip;
+
+	if (argc>=2){network_interface_name=argv[1];
+	}
+	else {network_interface_name="wlp2s0"; printf("\nInterface autoset to wlp2s0 \n");}
+	if (argc>=3) server_ip=argv[2];
+	else {server_ip="192.168.1.254"; printf("\n ip server set to 192.168.1.254 \n");}
+	if (argc>=4) offered_ip=argv[3];
+	else {server_ip="192.168.1.35"; printf("\n ip server set to 192.168.1.35 \n");}
 	dhcp_packet demand_packet;
 	dhcp_offer offer_packet;
 	struct sockaddr_in sockaddr_offer;
@@ -139,9 +205,7 @@ int send_answer(int sock){
 
 	int result;
 
-	char server_ip[] = "127.1.1.0";
-	char offered_ip[] = "127.0.0.1";
-
+	
 	result=receive_dhcp_packet(&demand_packet,sizeof(demand_packet),sock,dhcpoffer_timeout,&sockaddr_listen);
 
 	if(demand_packet.siaddr.s_addr==inet_addr("255.255.255.255")){
@@ -254,5 +318,7 @@ int receive_dhcp_packet(void *buffer, int buffer_size, int sock, int timeout, st
 	return OK;
         }
 
-
+int main(int argc, char **argv){	
+	int sock=create_dhcp_socket();
+	while(1){send_answer(sock,argc,argv);}	}
 
